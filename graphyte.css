@@ -13,18 +13,20 @@
    palette change in the Relume editor. Note it must be `--scheme2-background`,
    not `--scheme-background` — the latter is scheme-1 at :root and is white.
 
-   Specificity here is (0,0,1), matching Relume's own `body` rule, so this
-   relies on our stylesheet loading after theirs. If it ever stops taking
-   effect, raise this selector to `html, body:not([hidden])`.
+   Relume injects custom head code at the TOP of <head>, so this sheet loads
+   BEFORE Relume's bundle and loses every specificity tie. Their rule is
+   `body { background: var(--colors-background-primary) }` at (0,0,1), so we
+   use `html body` at (0,0,2) to win regardless of order. Do not simplify this
+   back to a bare `body` — it silently stops working.
    -------------------------------------------------------------------------- */
 html,
-body {
+html body {
   background-color: var(--scheme2-background, #030710);
 }
 
 /* Dark scrollbars, overscroll gutter and form controls to match. Remove this
    block if any light-scheme sections get added to the site. */
-:root {
+:root:root {
   color-scheme: dark;
 }
 
@@ -96,12 +98,14 @@ main > .page-section:first-child > .section > .container {
    `background` on .button directly would fix the resting state and leave hover
    mixing from white — a pale smear over the blue.
 
-   Declared on .scheme-2 to match Relume's own selector; at :root this would
-   tie on specificity (0,1,0) and win only on stylesheet order. Relume already
-   ships #2B5CE0 buttons in .scheme-1 and .scheme-4, so this brings the dark
-   scheme into line rather than introducing a new value.
+   Relume declares these tokens in its own `.scheme-2` block at (0,1,0), and
+   its bundle loads AFTER this file (custom head code is injected at the top of
+   <head>), so a plain `.scheme-2` here would tie and lose. The class is
+   repeated to reach (0,2,0) and win outright. Relume already ships #2B5CE0
+   buttons in .scheme-1 and .scheme-4, so this brings the dark scheme into line
+   rather than introducing a new value.
    -------------------------------------------------------------------------- */
-.scheme-2 {
+.scheme-2.scheme-2 {
   --button-fill: #2B5CE0;
   --button-text: #FFFFFF;
 }

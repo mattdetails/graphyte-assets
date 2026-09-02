@@ -31,22 +31,48 @@
     driftSpeed:  2              /* px per second */
   };
 
-  /* Retarget the CTA at runtime. The Relume markup is not editable here, so
-     this is the permanent fix, not a stopgap.
+  /* Retarget the CTA.
+
+     The button carries data-bind="{"attrs":{"href":"buttonLink"}}", so Relume's
+     bundle re-applies the address from data-props during hydration. Our scripts
+     run FIRST (custom head code is injected at the top of <head>), so simply
+     setting href is overwritten moments later. Three layers:
+
+       1. rewrite data-props, so Relume's own binding produces the right value
+       2. set href directly, for the pre-hydration paint
+       3. observe, in case anything re-renders the node later
+
+     The observer only touches nodes still holding the OLD address, so our own
+     writes cannot retrigger it and it settles after one pass.
 
      Caveat: the served HTML still contains the old address, so a visitor with
-     JS blocked or failing will mail hello@ instead. Worth pointing hello@ at
-     the same inbox as a safety net — then both routes land correctly. */
+     JS blocked will mail hello@. Point that alias at the same inbox as a net. */
   var CTA_FROM = "mailto:hello@graphytedesign.com";
   var CTA_TO   = "mailto:matt@graphytedesign.com";
 
-  function retargetCta() {
+  function applyCta() {
     var links = document.querySelectorAll('a[href="' + CTA_FROM + '"]');
-    for (var i = 0; i < links.length; i++) links[i].setAttribute("href", CTA_TO);
+    for (var i = 0; i < links.length; i++) {
+      var a = links[i], props = a.getAttribute("data-props");
+      if (props && props.indexOf(CTA_FROM) > -1) {
+        a.setAttribute("data-props", props.split(CTA_FROM).join(CTA_TO));
+      }
+      a.setAttribute("href", CTA_TO);
+    }
+  }
+
+  function watchCta() {
+    if (!window.MutationObserver || !document.body) return;
+    new MutationObserver(applyCta).observe(document.body, {
+      subtree: true, childList: true,
+      attributes: true, attributeFilter: ["href", "data-props"]
+    });
   }
 
   function start() {
-    retargetCta();
+    applyCta();
+    watchCta();
+    window.addEventListener("load", applyCta);
     var host = document.querySelector("main > .page-section:first-child > .section");
     if (!host || !window.GraphyteLattice) return;
     window.GraphyteLattice(host, CFG);
