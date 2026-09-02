@@ -13,21 +13,21 @@
 
   var CFG = {
     anchor:      ".container",  /* bloom centres on this element */
-    cell:        10,            /* base hex radius, px — fine mesh */
+    cell:        43,            /* base hex radius, px */
     octaves:     1,             /* single lattice; see note above */
     ratio:       1.2,           /* inert while octaves === 1 */
     rotate:      0,             /* inert while octaves === 1 */
-    stroke:      1,             /* px */
-    strokeScale: 1,             /* inert while octaves === 1 */
-    outer:       92,            /* bloom radius, % of half-diagonal */
-    hole:        0,             /* no clear centre — lattice runs behind the copy */
-    peak:        39,            /* % where the lattice is fully opaque */
-    aspect:      0.81,          /* <1 makes the bloom taller than it is wide */
-    detail:      0.61,          /* inert while octaves === 1 */
+    stroke:      1.25,          /* px */
+    strokeScale: 0,             /* inert while octaves === 1 */
+    outer:       60,            /* bloom radius, % of half-diagonal */
+    hole:        1,             /* clear centre, % — 1% is effectively none */
+    peak:        58,            /* % where the lattice is fully opaque */
+    aspect:      1.42,          /* >1 stretches the bloom horizontally */
+    detail:      1,             /* inert while octaves === 1 */
     color:       "#7C9AEC",
-    opacity:     7.5,           /* master, % */
+    opacity:     9,             /* master, % */
     falloff:     0.3,           /* inert while octaves === 1 */
-    drift:       true,          /* slow sheet slide; honours prefers-reduced-motion */
+    drift:       false,         /* slow sheet slide; honours prefers-reduced-motion */
     driftSpeed:  2              /* px per second */
   };
 
