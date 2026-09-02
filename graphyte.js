@@ -2,28 +2,33 @@
    Graphyte — site config
    Tune these values in the lattice tuner, then paste them here.
    Requires lattice.js to have loaded first.
+
+   NOTE: octaves is 1, so this draws a single lattice. That leaves ratio,
+   rotate, strokeScale, detail and falloff inert — they only describe how
+   octave N differs from octave N-1, and there is no octave 1. They are kept
+   at their tuned values so raising `octaves` picks up where you left off.
    ========================================================================== */
 (function () {
   "use strict";
 
   var CFG = {
     anchor:      ".container",  /* bloom centres on this element */
-    cell:        46,            /* base hex radius, px */
-    octaves:     3,             /* how many lattice scales stack */
-    ratio:       1.732,         /* √3 — each octave lands on the previous one */
-    rotate:      30,            /* degrees per octave; 30 completes the √3 R30° */
-    stroke:      0.75,          /* px */
-    strokeScale: 0.45,          /* 0 = uniform weight, 1 = fully proportional */
-    outer:       62,            /* bloom radius, % of half-diagonal */
-    hole:        18,            /* clear centre, % — keeps the grid off the headline */
-    peak:        42,            /* % where the lattice is fully opaque */
-    aspect:      1.35,          /* >1 stretches the bloom horizontally */
-    detail:      0.72,          /* each finer octave masked this much tighter */
+    cell:        10,            /* base hex radius, px — fine mesh */
+    octaves:     1,             /* single lattice; see note above */
+    ratio:       1.2,           /* inert while octaves === 1 */
+    rotate:      0,             /* inert while octaves === 1 */
+    stroke:      1,             /* px */
+    strokeScale: 1,             /* inert while octaves === 1 */
+    outer:       92,            /* bloom radius, % of half-diagonal */
+    hole:        0,             /* no clear centre — lattice runs behind the copy */
+    peak:        39,            /* % where the lattice is fully opaque */
+    aspect:      0.81,          /* <1 makes the bloom taller than it is wide */
+    detail:      0.61,          /* inert while octaves === 1 */
     color:       "#7C9AEC",
-    opacity:     10,            /* master, % */
-    falloff:     0.65,          /* per-octave opacity multiplier */
-    drift:       false,         /* slow sheet slide; honours prefers-reduced-motion */
-    driftSpeed:  2
+    opacity:     7.5,           /* master, % */
+    falloff:     0.3,           /* inert while octaves === 1 */
+    drift:       true,          /* slow sheet slide; honours prefers-reduced-motion */
+    driftSpeed:  2              /* px per second */
   };
 
   function start() {
