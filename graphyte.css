@@ -116,3 +116,55 @@ main > .page-section:first-child > .section > .container {
 .scheme-2 .button:focus-visible {
   outline-color: #FFFFFF;
 }
+
+/* --------------------------------------------------------------------------
+   Entrance — staggered rise and fade
+
+   Deliberately CSS-only. A JS reveal would need the hidden start state in the
+   stylesheet, which leaves content invisible forever if the script fails to
+   run; applying the start state from JS instead flashes the content first.
+   Keyframes with `animation-fill-mode: both` hold the from-state during the
+   delay, and this sheet is render-blocking, so nothing paints unstyled.
+
+   Wrapped in `no-preference` rather than overridden afterwards, so for anyone
+   who asked for less motion the animation is never declared at all.
+
+   Four steps, not three: the heading and paragraph move a beat apart so the
+   copy cascades rather than arriving as one block. Tune the three knobs below.
+   -------------------------------------------------------------------------- */
+@media (prefers-reduced-motion: no-preference) {
+  main > .page-section:first-child > .section {
+    --gd-rise-distance: 10px;
+    --gd-rise-duration: 600ms;
+    --gd-rise-stagger: 90ms;
+  }
+
+  @keyframes gd-rise {
+    from { opacity: 0; transform: translateY(var(--gd-rise-distance, 10px)); }
+    to   { opacity: 1; transform: none; }
+  }
+
+  @keyframes gd-fade {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+  }
+
+  main > .page-section:first-child > .section .media-wrapper,
+  main > .page-section:first-child > .section h2,
+  main > .page-section:first-child > .section p,
+  main > .page-section:first-child > .section .button-group {
+    animation: gd-rise var(--gd-rise-duration, 600ms)
+               var(--easing-easeOut, cubic-bezier(0, 0, .2, 1)) both;
+  }
+
+  main > .page-section:first-child > .section .media-wrapper { animation-delay: 0ms; }
+  main > .page-section:first-child > .section h2             { animation-delay: calc(var(--gd-rise-stagger) * 1); }
+  main > .page-section:first-child > .section p              { animation-delay: calc(var(--gd-rise-stagger) * 2); }
+  main > .page-section:first-child > .section .button-group  { animation-delay: calc(var(--gd-rise-stagger) * 3); }
+
+  /* The lattice is injected by JS after the copy has begun moving, so without
+     this it snaps in. Slower and fade-only — it should settle, not arrive. */
+  .gd-lattice {
+    animation: gd-fade 1200ms var(--easing-easeOut, cubic-bezier(0, 0, .2, 1)) both;
+  }
+}
