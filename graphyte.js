@@ -31,6 +31,20 @@
     driftSpeed:  2              /* px per second */
   };
 
+
+  /* Logo stroke draw-on. The published logo is an <img>, so its internals are
+     unreachable; we inline the same SVG and draw its two stroked paths.
+     Conveniently the roundel and the DESIGN box are the only stroked elements
+     in the file — everything else is fill="white" — so "[stroke]" selects
+     exactly the two shapes and nothing else. */
+  var LOGO = {
+    enabled:  true,
+    delay:    300,   /* ms before the first stroke starts */
+    duration: 900,   /* ms per stroke */
+    stagger:  180,   /* ms between roundel and box */
+    easing:   "cubic-bezier(.65, 0, .35, 1)"
+  };
+
   /* Retarget the CTA.
 
      The button carries data-bind="{"attrs":{"href":"buttonLink"}}", so Relume's
@@ -69,10 +83,65 @@
     });
   }
 
+
+  function animateLogo() {
+    if (!LOGO.enabled) return;
+    if (window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    var wrap = document.querySelector("main > .page-section:first-child > .section .media-wrapper");
+    var img  = wrap && wrap.querySelector("img");
+    if (!img || !window.fetch || !document.body.animate) return;
+    var src = img.currentSrc || img.getAttribute("src");
+    if (!src) return;
+
+    fetch(src, { credentials: "same-origin" })
+      .then(function (r) { return r.ok ? r.text() : Promise.reject(r.status); })
+      .then(function (txt) {
+        var doc = new DOMParser().parseFromString(txt, "image/svg+xml");
+        if (doc.querySelector("parsererror")) return;
+        var svg = doc.querySelector("svg");
+        if (!svg) return;
+
+        svg = document.importNode(svg, true);
+        /* Inherit the img's own classes and inline sizing so Relume's media
+           rules keep applying and the layout does not shift on swap. */
+        svg.setAttribute("class", img.getAttribute("class") || "");
+        if (img.getAttribute("style")) svg.setAttribute("style", img.getAttribute("style"));
+        svg.setAttribute("aria-hidden", "true");
+        svg.setAttribute("focusable", "false");
+
+        /* Everything from here to the end of this function runs in one task,
+           so the browser never paints the undashed strokes. */
+        img.parentNode.replaceChild(svg, img);
+
+        var strokes = [].slice.call(svg.querySelectorAll("[stroke]"));
+        if (!strokes.length) return;
+        /* Draw left to right: the roundel sits at x~2, the box at x~73. */
+        strokes.sort(function (a, b) { return a.getBBox().x - b.getBBox().x; });
+
+        for (var i = 0; i < strokes.length; i++) {
+          var el = strokes[i];
+          if (!el.getTotalLength) continue;
+          var len = el.getTotalLength();
+          if (!len) continue;
+          el.style.strokeDasharray  = len;
+          el.style.strokeDashoffset = len;
+          el.animate(
+            [{ strokeDashoffset: len }, { strokeDashoffset: 0 }],
+            { duration: LOGO.duration,
+              delay: LOGO.delay + i * LOGO.stagger,
+              easing: LOGO.easing,
+              fill: "both" }
+          );
+        }
+      })
+      .catch(function () { /* leave the <img> in place */ });
+  }
+
   function start() {
     applyCta();
     watchCta();
     window.addEventListener("load", applyCta);
+    animateLogo();
     var host = document.querySelector("main > .page-section:first-child > .section");
     if (!host || !window.GraphyteLattice) return;
     window.GraphyteLattice(host, CFG);
