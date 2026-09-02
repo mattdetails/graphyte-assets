@@ -31,11 +31,12 @@
     driftSpeed:  2              /* px per second */
   };
 
-  /* Retarget the CTA. This is a stopgap: the address of record lives in the
-     Relume editor (the button's buttonLink prop), and the published HTML still
-     ships the old one — so a visitor with JS blocked mails the wrong inbox.
-     Fix it at source when you can; this rule then matches nothing and is a
-     no-op, safe to leave in place. */
+  /* Retarget the CTA at runtime. The Relume markup is not editable here, so
+     this is the permanent fix, not a stopgap.
+
+     Caveat: the served HTML still contains the old address, so a visitor with
+     JS blocked or failing will mail hello@ instead. Worth pointing hello@ at
+     the same inbox as a safety net — then both routes land correctly. */
   var CTA_FROM = "mailto:hello@graphytedesign.com";
   var CTA_TO   = "mailto:matt@graphytedesign.com";
 
