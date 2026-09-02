@@ -1,0 +1,86 @@
+/* ==========================================================================
+   Graphyte Design — custom overrides for Relume Publish
+   Loaded in <head> after Relume's own bundle.
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   Page canvas
+   Relume ships `body { background: var(--colors-background-primary) }`, which
+   resolves to #ffffff. The page's only section is `.scheme-2` (#030710), so
+   white flashes on overscroll and on any viewport taller than the content.
+
+   Track the scheme token rather than hard-coding the hex, so this survives a
+   palette change in the Relume editor. Note it must be `--scheme2-background`,
+   not `--scheme-background` — the latter is scheme-1 at :root and is white.
+
+   Specificity here is (0,0,1), matching Relume's own `body` rule, so this
+   relies on our stylesheet loading after theirs. If it ever stops taking
+   effect, raise this selector to `html, body:not([hidden])`.
+   -------------------------------------------------------------------------- */
+html,
+body {
+  background-color: var(--scheme2-background, #030710);
+}
+
+/* Dark scrollbars, overscroll gutter and form controls to match. Remove this
+   block if any light-scheme sections get added to the site. */
+:root {
+  color-scheme: dark;
+}
+
+/* --------------------------------------------------------------------------
+   Hero — fill the viewport, stay vertically centred
+
+   Relume already ships `.section { display: flex; align-items: center }`, so
+   the centring mechanism exists; the section simply had no surplus height to
+   centre within. Giving it a viewport-height floor is enough. `align-items`
+   is restated below so this file owns the centring guarantee rather than
+   inheriting it from a Relume default that could change.
+
+   `min-height`, never `height`: on viewports shorter than the content the
+   section grows and the page scrolls, instead of cropping the logo.
+
+   `svh` over `vh`/`dvh`: on mobile, `100vh` resolves to the *large* viewport
+   (browser chrome hidden), so the hero overflows on load; `100dvh` reflows as
+   the chrome hides and shows. `100svh` always fits without jank. The `100vh`
+   line above it is the fallback for browsers predating svh.
+
+   Scoped to the first section so any sections added later are unaffected. If
+   a navbar is ever added, subtract it: `calc(100svh - var(--navbar-height))`.
+   -------------------------------------------------------------------------- */
+main > .page-section:first-child > .section {
+  min-height: 100vh;
+  min-height: 100svh;
+  align-items: center;
+}
+
+/* --------------------------------------------------------------------------
+   Graphite lattice — host and stacking context
+
+   The SVG is injected as the section's first child by lattice.js.
+
+   The .container promotion is belt-and-braces, not a fix: Relume puts
+   .z-index-1 on an inner .stack, and a flex item with a non-auto z-index
+   forms a stacking context even while position:static — so content already
+   paints above the lattice. This rule just stops us depending on that class
+   staying where it is.
+   -------------------------------------------------------------------------- */
+main > .page-section:first-child > .section {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+}
+
+main > .page-section:first-child > .section > .container {
+  position: relative;
+  z-index: 1;
+}
+
+.gd-lattice {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 0;
+}
