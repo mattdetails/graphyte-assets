@@ -54,6 +54,19 @@ main > .page-section:first-child > .section {
   min-height: 100vh;
   min-height: 100svh;
   align-items: center;
+
+  /* Relume applies 160px of padding top AND bottom at desktop widths. With
+     410px of content that sets a 730px floor on the section, so any viewport
+     shorter than 730px — most laptops, once browser chrome is subtracted —
+     overflowed 100svh, gained a scrollbar and sat off-centre in the window.
+
+     Because the section is min-height + align-items:center and the padding is
+     symmetric, the padding does not influence where the content sits; it only
+     raises the minimum height. Capping it against viewport height therefore
+     moves nothing when the content already fits, and simply stops the
+     overflow when it does not. The 2rem floor keeps breathing room on
+     genuinely short viewports, where the section still grows and scrolls. */
+  padding-block: clamp(2rem, 6vh, var(--section-padding-large, 10rem));
 }
 
 /* --------------------------------------------------------------------------
