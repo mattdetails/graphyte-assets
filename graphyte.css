@@ -84,3 +84,31 @@ main > .page-section:first-child > .section > .container {
   pointer-events: none;
   z-index: 0;
 }
+
+/* --------------------------------------------------------------------------
+   Primary button — brand blue on the dark scheme
+
+   Relume derives every button state from two tokens:
+     :hover          color-mix(in srgb, var(--button-fill) 90%, var(--button-text))
+     :active         color-mix(in srgb, var(--button-fill) 85%, var(--button-text))
+     :focus-visible  outline: 2px solid var(--button-fill)
+   so overriding the tokens keeps hover and active coherent for free. Setting
+   `background` on .button directly would fix the resting state and leave hover
+   mixing from white — a pale smear over the blue.
+
+   Declared on .scheme-2 to match Relume's own selector; at :root this would
+   tie on specificity (0,1,0) and win only on stylesheet order. Relume already
+   ships #2B5CE0 buttons in .scheme-1 and .scheme-4, so this brings the dark
+   scheme into line rather than introducing a new value.
+   -------------------------------------------------------------------------- */
+.scheme-2 {
+  --button-fill: #2B5CE0;
+  --button-text: #FFFFFF;
+}
+
+/* The focus ring takes its colour from --button-fill, which would now draw a
+   blue ring immediately outside a blue button — 3.56:1 against the page, down
+   from 20.16:1. Pin it white. Delete this block for Relume's default back. */
+.scheme-2 .button:focus-visible {
+  outline-color: #FFFFFF;
+}

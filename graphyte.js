@@ -31,7 +31,21 @@
     driftSpeed:  2              /* px per second */
   };
 
+  /* Retarget the CTA. This is a stopgap: the address of record lives in the
+     Relume editor (the button's buttonLink prop), and the published HTML still
+     ships the old one — so a visitor with JS blocked mails the wrong inbox.
+     Fix it at source when you can; this rule then matches nothing and is a
+     no-op, safe to leave in place. */
+  var CTA_FROM = "mailto:hello@graphytedesign.com";
+  var CTA_TO   = "mailto:matt@graphytedesign.com";
+
+  function retargetCta() {
+    var links = document.querySelectorAll('a[href="' + CTA_FROM + '"]');
+    for (var i = 0; i < links.length; i++) links[i].setAttribute("href", CTA_TO);
+  }
+
   function start() {
+    retargetCta();
     var host = document.querySelector("main > .page-section:first-child > .section");
     if (!host || !window.GraphyteLattice) return;
     window.GraphyteLattice(host, CFG);
